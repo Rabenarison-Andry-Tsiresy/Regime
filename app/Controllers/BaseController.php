@@ -53,10 +53,34 @@ abstract class BaseController extends Controller
         return null;
     }
 
+    protected function requireAdmin()
+    {
+        if (! $this->isLoggedIn() || ($this->currentUser['role'] ?? 'user') !== 'admin') {
+            return redirect()->to('/admin/login');
+        }
+
+        return null;
+    }
+
     protected function render(string $view, array $data = [])
     {
         $data['currentUser'] = $this->currentUser;
+        $data['isAdmin'] = ($this->currentUser['role'] ?? 'user') === 'admin';
 
         return view($view, $data);
+    }
+
+    protected function setSessionUser(array $user): void
+    {
+        $payload = [
+            'id' => $user['id'],
+            'nom' => $user['nom'],
+            'email' => $user['email'],
+            'role' => $user['role'] ?? 'user',
+            'premium' => (int) ($user['premium'] ?? 0),
+        ];
+
+        $this->session->set('user', $payload);
+        $this->currentUser = $payload;
     }
 }
