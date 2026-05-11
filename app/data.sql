@@ -1,202 +1,282 @@
-create database regime;
-use regime;
 
-create table sexes (
-    id int unsigned primary key auto_increment,
-    label varchar(20) not null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_sexes_label (label)
-) engine=InnoDB default charset=utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
-create table objectifs (
-    id int unsigned primary key auto_increment,
-    code varchar(30) not null,
-    label varchar(100) not null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_objectifs_code (code)
-) engine=InnoDB default charset=utf8mb4;
+-- ============================================
+-- SUPPRESSION DES TABLES EXISTANTES
+-- ============================================
+DROP TABLE IF EXISTS `parametres`;
+DROP TABLE IF EXISTS `paiements`;
+DROP TABLE IF EXISTS `historique_regimes`;
+DROP TABLE IF EXISTS `abonnements_gold`;
+DROP TABLE IF EXISTS `codes_gold`;
+DROP TABLE IF EXISTS `codes_rechargement`;
+DROP TABLE IF EXISTS `portefeuilles`;
+DROP TABLE IF EXISTS `activites_sportives`;
+DROP TABLE IF EXISTS `aliments`;
+DROP TABLE IF EXISTS `regimes`;
+DROP TABLE IF EXISTS `profil_sante`;
+DROP TABLE IF EXISTS `utilisateurs`;
+DROP TABLE IF EXISTS `objectifs`;
+DROP TABLE IF EXISTS `sexes`;
 
-create table utilisateurs (
-    id int unsigned primary key auto_increment,
-    nom varchar(120) not null,
-    email varchar(190) not null,
-    password_hash varchar(255) not null,
-    age int null,
-    sexe_id int unsigned null,
-    role varchar(20) not null default 'user',
-    premium tinyint(1) not null default 0,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_utilisateurs_email (email),
-    key idx_utilisateurs_sexe (sexe_id),
-    constraint fk_utilisateurs_sexe foreign key (sexe_id) references sexes(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- ============================================
+-- CRÉATION DES TABLES
+-- ============================================
 
-create table profil_sante (
-    id int unsigned primary key auto_increment,
-    user_id int unsigned not null,
-    taille_cm decimal(5,2) not null,
-    poids_kg decimal(5,2) not null,
-    objectif_id int unsigned null,
-    imc decimal(5,2) null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_profil_sante_user (user_id),
-    key idx_profil_sante_objectif (objectif_id),
-    constraint fk_profil_sante_user foreign key (user_id) references utilisateurs(id) on delete cascade on update cascade,
-    constraint fk_profil_sante_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: sexes
+CREATE TABLE `sexes` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `label` VARCHAR(20) NOT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_label` (`label`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table regimes (
-    id int unsigned primary key auto_increment,
-    nom varchar(120) not null,
-    description text null,
-    duree_jours int not null,
-    prix decimal(10,2) not null,
-    calories_cible int not null,
-    variation_poids decimal(5,2) null,
-    pourcentage_viande tinyint not null,
-    pourcentage_poisson tinyint not null,
-    pourcentage_volaille tinyint not null,
-    pourcentage_legumes_verts tinyint not null,
-    pourcentage_fruits tinyint not null,
-    pourcentage_feculents tinyint not null,
-    objectif_id int unsigned null,
-    created_at datetime null,
-    updated_at datetime null,
-    key idx_regimes_objectif (objectif_id),
-    constraint fk_regimes_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: objectifs
+CREATE TABLE `objectifs` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(30) NOT NULL,
+    `label` VARCHAR(100) NOT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table activites_sportives (
-    id int unsigned primary key auto_increment,
-    nom varchar(120) not null,
-    description text null,
-    objectif_id int unsigned null,
-    intensite varchar(20) null,
-    created_at datetime null,
-    updated_at datetime null,
-    key idx_activites_objectif (objectif_id),
-    constraint fk_activites_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: utilisateurs
+CREATE TABLE `utilisateurs` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nom` VARCHAR(120) NOT NULL,
+    `email` VARCHAR(190) NOT NULL,
+    `password_hash` VARCHAR(255) NOT NULL,
+    `age` INT(3) DEFAULT NULL,
+    `sexe_id` INT(11) UNSIGNED DEFAULT NULL,
+    `role` VARCHAR(20) DEFAULT 'user',
+    `premium` TINYINT(1) DEFAULT 0,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_email` (`email`),
+    KEY `idx_sexe_id` (`sexe_id`),
+    CONSTRAINT `fk_utilisateurs_sexe` FOREIGN KEY (`sexe_id`) REFERENCES `sexes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table aliments (
-    id int unsigned primary key auto_increment,
-    nom varchar(120) not null,
-    categorie varchar(60) null,
-    description text null,
-    recommandation text null,
-    objectif_id int unsigned null,
-    actif tinyint(1) not null default 1,
-    created_at datetime null,
-    updated_at datetime null,
-    key idx_aliments_objectif (objectif_id),
-    constraint fk_aliments_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: profil_sante
+CREATE TABLE `profil_sante` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `taille_cm` DECIMAL(5,2) NOT NULL,
+    `poids_kg` DECIMAL(5,2) NOT NULL,
+    `objectif_id` INT(11) UNSIGNED DEFAULT NULL,
+    `imc` DECIMAL(5,2) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_user_id` (`user_id`),
+    KEY `idx_objectif_id` (`objectif_id`),
+    CONSTRAINT `fk_profil_sante_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_profil_sante_objectif` FOREIGN KEY (`objectif_id`) REFERENCES `objectifs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table portefeuilles (
-    id int unsigned primary key auto_increment,
-    user_id int unsigned not null,
-    solde decimal(10,2) not null default 0,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_portefeuilles_user (user_id),
-    constraint fk_portefeuilles_user foreign key (user_id) references utilisateurs(id) on delete cascade on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: regimes
+CREATE TABLE `regimes` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nom` VARCHAR(120) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `duree_jours` INT(4) NOT NULL,
+    `prix` DECIMAL(10,2) NOT NULL,
+    `calories_cible` INT(6) NOT NULL,
+    `variation_poids` DECIMAL(5,2) DEFAULT NULL,
+    `pourcentage_viande` TINYINT(3) NOT NULL,
+    `pourcentage_poisson` TINYINT(3) NOT NULL,
+    `pourcentage_volaille` TINYINT(3) NOT NULL,
+    `pourcentage_legumes_verts` TINYINT(3) NOT NULL,
+    `pourcentage_fruits` TINYINT(3) NOT NULL,
+    `pourcentage_feculents` TINYINT(3) NOT NULL,
+    `objectif_id` INT(11) UNSIGNED DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_objectif_id` (`objectif_id`),
+    CONSTRAINT `fk_regimes_objectif` FOREIGN KEY (`objectif_id`) REFERENCES `objectifs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table codes_rechargement (
-    id int unsigned primary key auto_increment,
-    code varchar(50) not null,
-    valeur decimal(10,2) not null,
-    date_expiration datetime null,
-    actif tinyint(1) not null default 1,
-    used_by int unsigned null,
-    used_at datetime null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_codes_rechargement_code (code),
-    key idx_codes_rechargement_used_by (used_by),
-    constraint fk_codes_rechargement_user foreign key (used_by) references utilisateurs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: activites_sportives
+CREATE TABLE `activites_sportives` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nom` VARCHAR(120) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `objectif_id` INT(11) UNSIGNED DEFAULT NULL,
+    `intensite` VARCHAR(20) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_objectif_id` (`objectif_id`),
+    CONSTRAINT `fk_activites_sportives_objectif` FOREIGN KEY (`objectif_id`) REFERENCES `objectifs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table codes_gold (
-    id int unsigned primary key auto_increment,
-    code varchar(50) not null,
-    actif tinyint(1) not null default 1,
-    used_by int unsigned null,
-    used_at datetime null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_codes_gold_code (code),
-    key idx_codes_gold_used_by (used_by),
-    constraint fk_codes_gold_user foreign key (used_by) references utilisateurs(id) on delete set null on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: aliments
+CREATE TABLE `aliments` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `nom` VARCHAR(120) NOT NULL,
+    `categorie` VARCHAR(60) DEFAULT NULL,
+    `description` TEXT DEFAULT NULL,
+    `recommandation` TEXT DEFAULT NULL,
+    `objectif_id` INT(11) UNSIGNED DEFAULT NULL,
+    `actif` TINYINT(1) DEFAULT 1,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_objectif_id` (`objectif_id`),
+    CONSTRAINT `fk_aliments_objectif` FOREIGN KEY (`objectif_id`) REFERENCES `objectifs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table abonnements_gold (
-    id int unsigned primary key auto_increment,
-    user_id int unsigned not null,
-    date_debut date not null,
-    date_fin date null,
-    prix decimal(10,2) not null,
-    actif tinyint(1) not null default 1,
-    created_at datetime null,
-    updated_at datetime null,
-    key idx_abonnements_gold_user (user_id),
-    constraint fk_abonnements_gold_user foreign key (user_id) references utilisateurs(id) on delete cascade on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: portefeuilles
+CREATE TABLE `portefeuilles` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `solde` DECIMAL(10,2) DEFAULT 0,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_user_id` (`user_id`),
+    CONSTRAINT `fk_portefeuilles_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table historique_regimes (
-    id int unsigned primary key auto_increment,
-    user_id int unsigned not null,
-    regime_id int unsigned not null,
-    date_debut date not null,
-    date_fin date not null,
-    prix_applique decimal(10,2) not null,
-    remise_appliquee decimal(10,2) not null default 0,
-    created_at datetime null,
-    updated_at datetime null,
-    key idx_historique_regimes_user (user_id),
-    key idx_historique_regimes_regime (regime_id),
-    constraint fk_historique_regimes_user foreign key (user_id) references utilisateurs(id) on delete cascade on update cascade,
-    constraint fk_historique_regimes_regime foreign key (regime_id) references regimes(id) on delete cascade on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: codes_rechargement
+CREATE TABLE `codes_rechargement` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(50) NOT NULL,
+    `valeur` DECIMAL(10,2) NOT NULL,
+    `date_expiration` DATETIME DEFAULT NULL,
+    `actif` TINYINT(1) DEFAULT 1,
+    `used_by` INT(11) UNSIGNED DEFAULT NULL,
+    `used_at` DATETIME DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_code` (`code`),
+    KEY `idx_used_by` (`used_by`),
+    CONSTRAINT `fk_codes_rechargement_user` FOREIGN KEY (`used_by`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table paiements (
-    id int unsigned primary key auto_increment,
-    user_id int unsigned not null,
-    type varchar(20) not null,
-    montant decimal(10,2) not null,
-    reference varchar(100) null,
-    created_at datetime null,
-    key idx_paiements_user (user_id),
-    constraint fk_paiements_user foreign key (user_id) references utilisateurs(id) on delete cascade on update cascade
-) engine=InnoDB default charset=utf8mb4;
+-- Table: codes_gold
+CREATE TABLE `codes_gold` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(50) NOT NULL,
+    `actif` TINYINT(1) DEFAULT 1,
+    `used_by` INT(11) UNSIGNED DEFAULT NULL,
+    `used_at` DATETIME DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_code` (`code`),
+    KEY `idx_used_by` (`used_by`),
+    CONSTRAINT `fk_codes_gold_user` FOREIGN KEY (`used_by`) REFERENCES `utilisateurs` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-create table parametres (
-    id int unsigned primary key auto_increment,
-    cle varchar(50) not null,
-    valeur varchar(255) not null,
-    created_at datetime null,
-    updated_at datetime null,
-    unique key uq_parametres_cle (cle)
-) engine=InnoDB default charset=utf8mb4;
+-- Table: abonnements_gold
+CREATE TABLE `abonnements_gold` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `date_debut` DATE NOT NULL,
+    `date_fin` DATE DEFAULT NULL,
+    `prix` DECIMAL(10,2) NOT NULL,
+    `actif` TINYINT(1) DEFAULT 1,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    CONSTRAINT `fk_abonnements_gold_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into sexes (label, created_at, updated_at) values
-('Homme', now(), now()),
-('Femme', now(), now()),
-('Autre', now(), now());
+-- Table: historique_regimes
+CREATE TABLE `historique_regimes` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `regime_id` INT(11) UNSIGNED NOT NULL,
+    `date_debut` DATE NOT NULL,
+    `date_fin` DATE NOT NULL,
+    `prix_applique` DECIMAL(10,2) NOT NULL,
+    `remise_appliquee` DECIMAL(10,2) DEFAULT 0,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_regime_id` (`regime_id`),
+    CONSTRAINT `fk_historique_regimes_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_historique_regimes_regime` FOREIGN KEY (`regime_id`) REFERENCES `regimes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into objectifs (code, label, created_at, updated_at) values
-('gain', 'Augmenter le poids', now(), now()),
-('loss', 'Reduire le poids', now(), now()),
-('ideal', 'Atteindre IMC ideal', now(), now());
+-- Table: paiements
+CREATE TABLE `paiements` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` INT(11) UNSIGNED NOT NULL,
+    `type` VARCHAR(20) NOT NULL,
+    `montant` DECIMAL(10,2) NOT NULL,
+    `reference` VARCHAR(100) DEFAULT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    CONSTRAINT `fk_paiements_user` FOREIGN KEY (`user_id`) REFERENCES `utilisateurs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-insert into parametres (cle, valeur, created_at, updated_at) values
-('imc_underweight_max', '18.5', now(), now()),
-('imc_normal_max', '24.9', now(), now()),
-('imc_overweight_max', '29.9', now(), now()),
-('gold_price', '50', now(), now()),
-('gold_discount_percent', '15', now(), now());
+-- Table: parametres
+CREATE TABLE `parametres` (
+    `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `cle` VARCHAR(50) NOT NULL,
+    `valeur` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME DEFAULT NULL,
+    `updated_at` DATETIME DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `unique_cle` (`cle`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ============================================
+-- INSERTION DES DONNÉES (SEEDER)
+-- ============================================
+
+-- Insertion dans sexes
+INSERT INTO `sexes` (`id`, `label`, `created_at`, `updated_at`) VALUES
+(1, 'Homme', NOW(), NOW()),
+(2, 'Femme', NOW(), NOW()),
+(3, 'Autre', NOW(), NOW());
+
+-- Insertion dans objectifs
+INSERT INTO `objectifs` (`id`, `code`, `label`, `created_at`, `updated_at`) VALUES
+(1, 'perte_poids', 'Perte de poids', NOW(), NOW()),
+(2, 'maintien', 'Maintien du poids', NOW(), NOW()),
+(3, 'prise_muscle', 'Prise de muscle', NOW(), NOW()),
+(4, 'secheresse', 'Sècheresse', NOW(), NOW());
+
+-- Insertion dans regimes (quelques exemples)
+INSERT INTO `regimes` (`id`, `nom`, `description`, `duree_jours`, `prix`, `calories_cible`, `variation_poids`, `pourcentage_viande`, `pourcentage_poisson`, `pourcentage_volaille`, `pourcentage_legumes_verts`, `pourcentage_fruits`, `pourcentage_feculents`, `objectif_id`, `created_at`, `updated_at`) VALUES
+(1, 'Régime Protéiné', 'Régime riche en protéines pour la prise de muscle', 30, 49.99, 2500, 2.50, 40, 20, 20, 10, 5, 5, 3, NOW(), NOW()),
+(2, 'Régime Équilibré', 'Régime équilibré pour maintenir son poids', 30, 29.99, 2000, 0.00, 25, 15, 20, 20, 15, 5, 2, NOW(), NOW()),
+(3, 'Régime Hypocalorique', 'Régime faible en calories pour perdre du poids', 30, 39.99, 1500, -3.00, 20, 15, 15, 25, 15, 10, 1, NOW(), NOW());
+
+-- Insertion dans activites_sportives
+INSERT INTO `activites_sportives` (`id`, `nom`, `description`, `objectif_id`, `intensite`, `created_at`, `updated_at`) VALUES
+(1, 'Cardio', 'Course, vélo, natation', 1, 'Modérée', NOW(), NOW()),
+(2, 'Musculation', 'Développement musculaire', 3, 'Élevée', NOW(), NOW()),
+(3, 'Yoga', 'Souplesse et bien-être', 2, 'Faible', NOW(), NOW());
+
+-- Insertion dans aliments
+INSERT INTO `aliments` (`id`, `nom`, `categorie`, `description`, `recommandation`, `objectif_id`, `actif`, `created_at`, `updated_at`) VALUES
+(1, 'Poulet grillé', 'Viande', 'Source de protéines maigres', 'À consommer midi et soir', 3, 1, NOW(), NOW()),
+(2, 'Saumon', 'Poisson', 'Riche en oméga-3', '2 fois par semaine', 2, 1, NOW(), NOW()),
+(3, 'Brocoli', 'Légume vert', 'Riche en fibres et vitamines', 'À volonté', 1, 1, NOW(), NOW()),
+(4, 'Quinoa', 'Féculent', 'Céréale complète', 'Portion contrôlée', 2, 1, NOW(), NOW());
+
+-- Insertion dans parametres
+INSERT INTO `parametres` (`id`, `cle`, `valeur`, `created_at`, `updated_at`) VALUES
+(1, 'site_name', 'RegimeApp', NOW(), NOW()),
+(2, 'site_email', 'contact@regimeapp.com', NOW(), NOW()),
+(3, 'prix_abonnement_gold_mensuel', '19.99', NOW(), NOW()),
+(4, 'prix_abonnement_gold_annuel', '199.99', NOW(), NOW());
+
+-- ============================================
+-- RÉACTIVATION DES CLÉS ÉTRANGÈRES
+-- ============================================
+SET FOREIGN_KEY_CHECKS = 1;

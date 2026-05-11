@@ -21,7 +21,8 @@ class Imc extends BaseController
 
         $taille = (float) $profil['taille_cm'];
         $poids = (float) $profil['poids_kg'];
-        $imc = $taille > 0 ? $poids / pow($taille / 100, 2) : 0.0;
+        $taille_m = ($taille > 0 && $taille < 10) ? $taille : $taille / 100;
+        $imc = $taille > 0 ? $poids / pow($taille_m, 2) : 0.0;
 
         $paramModel = new ParametreModel();
         $under = (float) $paramModel->getValue('imc_underweight_max', '18.5');

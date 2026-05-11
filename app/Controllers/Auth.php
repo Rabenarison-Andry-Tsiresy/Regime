@@ -162,7 +162,8 @@ class Auth extends BaseController
         ]);
 
         $userId = (int) $userModel->getInsertID();
-        $imc = $taille > 0 ? $poids / pow($taille / 100, 2) : null;
+        $taille_m = ($taille > 0 && $taille < 10) ? $taille : $taille / 100;
+        $imc = $taille > 0 ? $poids / pow($taille_m, 2) : null;
 
         (new ProfilSanteModel())->insert([
             'user_id' => $userId,
