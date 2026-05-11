@@ -3,8 +3,28 @@
 <?php
 $discountRate = $isGold ? ((float) $discountPercent / 100) : 0.0;
 $formatPrice = static fn ($value) => number_format((float) $value, 2, '.', ' ');
+$formatCalories = static fn ($value) => number_format((float) $value, 0, '.', ' ');
 $prix = (float) $regime['prix'];
 $prixFinal = $isGold ? $prix - ($prix * $discountRate) : $prix;
+$compositionLabels = [
+    'pourcentage_viande' => 'Viande',
+    'pourcentage_poisson' => 'Poisson',
+    'pourcentage_volaille' => 'Volaille',
+    'pourcentage_legumes_verts' => 'Legumes verts',
+    'pourcentage_fruits' => 'Fruits',
+    'pourcentage_feculents' => 'Feculents',
+];
+$caloriesCible = isset($regime['calories_cible']) ? (int) $regime['calories_cible'] : 0;
+$compositionLines = [];
+foreach ($compositionLabels as $field => $label) {
+    $percent = (int) ($regime[$field] ?? 0);
+    $line = $label . ' ' . $percent . '%';
+    if ($caloriesCible > 0) {
+        $calories = (int) round($caloriesCible * ($percent / 100));
+        $line .= ' (' . $formatCalories($calories) . ' kcal)';
+    }
+    $compositionLines[] = $line;
+}
 ?>
 <div class="card">
     <h1><?= esc($regime['nom']) ?></h1>
@@ -21,8 +41,16 @@ $prixFinal = $isGold ? $prix - ($prix * $discountRate) : $prix;
             <div class="stat-value"><?= esc($regime['variation_poids'] ?? '-') ?></div>
         </div>
         <div class="card">
+            <div class="stat-title">Calories cible</div>
+            <div class="stat-value"><?= $caloriesCible > 0 ? esc($formatCalories($caloriesCible)) . ' kcal' : '-' ?></div>
+        </div>
+        <div class="card">
             <div class="stat-title">Composition</div>
-            <div class="stat-value">Viande <?= esc($regime['pourcentage_viande']) ?>% / Poisson <?= esc($regime['pourcentage_poisson']) ?>% / Volaille <?= esc($regime['pourcentage_volaille']) ?>%</div>
+            <div class="stat-value">
+                <?php foreach ($compositionLines as $line): ?>
+                    <div><?= esc($line) ?></div>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 

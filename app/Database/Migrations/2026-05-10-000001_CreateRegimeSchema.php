@@ -3,6 +3,7 @@
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
+use Config\Database;
 
 class CreateRegimeSchema extends Migration
 {
@@ -185,6 +186,10 @@ class CreateRegimeSchema extends Migration
                 'type'       => 'DECIMAL',
                 'constraint' => '10,2',
             ],
+            'calories_cible' => [
+                'type'       => 'INT',
+                'constraint' => 6,
+            ],
             'variation_poids' => [
                 'type'       => 'DECIMAL',
                 'constraint' => '5,2',
@@ -199,6 +204,18 @@ class CreateRegimeSchema extends Migration
                 'constraint' => 3,
             ],
             'pourcentage_volaille' => [
+                'type'       => 'TINYINT',
+                'constraint' => 3,
+            ],
+            'pourcentage_legumes_verts' => [
+                'type'       => 'TINYINT',
+                'constraint' => 3,
+            ],
+            'pourcentage_fruits' => [
+                'type'       => 'TINYINT',
+                'constraint' => 3,
+            ],
+            'pourcentage_feculents' => [
                 'type'       => 'TINYINT',
                 'constraint' => 3,
             ],
@@ -261,6 +278,55 @@ class CreateRegimeSchema extends Migration
         $this->forge->addKey('objectif_id');
         $this->forge->addForeignKey('objectif_id', 'objectifs', 'id', 'SET NULL', 'CASCADE');
         $this->forge->createTable('activites_sportives', true);
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'nom' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 120,
+            ],
+            'categorie' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 60,
+                'null'       => true,
+            ],
+            'description' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'recommandation' => [
+                'type' => 'TEXT',
+                'null' => true,
+            ],
+            'objectif_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
+            ],
+            'actif' => [
+                'type'       => 'TINYINT',
+                'constraint' => 1,
+                'default'    => 1,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->addKey('objectif_id');
+        $this->forge->addForeignKey('objectif_id', 'objectifs', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->createTable('aliments', true);
 
         $this->forge->addField([
             'id' => [
@@ -341,6 +407,47 @@ class CreateRegimeSchema extends Migration
         $this->forge->addKey('used_by');
         $this->forge->addForeignKey('used_by', 'utilisateurs', 'id', 'SET NULL', 'CASCADE');
         $this->forge->createTable('codes_rechargement', true);
+
+        $this->forge->addField([
+            'id' => [
+                'type'           => 'INT',
+                'constraint'     => 11,
+                'unsigned'       => true,
+                'auto_increment' => true,
+            ],
+            'code' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+            ],
+            'actif' => [
+                'type'       => 'TINYINT',
+                'constraint' => 1,
+                'default'    => 1,
+            ],
+            'used_by' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
+            ],
+            'used_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true,
+            ],
+        ]);
+        $this->forge->addKey('id', true);
+        $this->forge->addUniqueKey('code');
+        $this->forge->addKey('used_by');
+        $this->forge->addForeignKey('used_by', 'utilisateurs', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->createTable('codes_gold', true);
 
         $this->forge->addField([
             'id' => [
@@ -494,6 +601,8 @@ class CreateRegimeSchema extends Migration
         $this->forge->addKey('id', true);
         $this->forge->addUniqueKey('cle');
         $this->forge->createTable('parametres', true);
+
+        $this->resetAndSeed();
     }
 
     public function down()
@@ -502,13 +611,49 @@ class CreateRegimeSchema extends Migration
         $this->forge->dropTable('paiements', true);
         $this->forge->dropTable('historique_regimes', true);
         $this->forge->dropTable('abonnements_gold', true);
+        $this->forge->dropTable('codes_gold', true);
         $this->forge->dropTable('codes_rechargement', true);
         $this->forge->dropTable('portefeuilles', true);
         $this->forge->dropTable('activites_sportives', true);
+        $this->forge->dropTable('aliments', true);
         $this->forge->dropTable('regimes', true);
         $this->forge->dropTable('profil_sante', true);
         $this->forge->dropTable('utilisateurs', true);
         $this->forge->dropTable('objectifs', true);
         $this->forge->dropTable('sexes', true);
+    }
+
+    private function resetAndSeed(): void
+    {
+        // Destructif: reinitialise les donnees a chaque migration.
+        $this->db->disableForeignKeyChecks();
+
+        $tables = [
+            'paiements',
+            'historique_regimes',
+            'abonnements_gold',
+            'codes_gold',
+            'codes_rechargement',
+            'portefeuilles',
+            'profil_sante',
+            'utilisateurs',
+            'activites_sportives',
+            'aliments',
+            'regimes',
+            'objectifs',
+            'sexes',
+            'parametres',
+        ];
+
+        foreach ($tables as $table) {
+            if ($this->db->tableExists($table)) {
+                $this->db->table($table)->truncate();
+            }
+        }
+
+        $this->db->enableForeignKeyChecks();
+
+        $seeder = Database::seeder();
+        $seeder->call('RegimeSeeder');
     }
 }
