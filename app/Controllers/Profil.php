@@ -66,7 +66,8 @@ class Profil extends BaseController
             'sexe_id' => $sexeId,
         ]);
 
-        $imc = $taille > 0 ? $poids / pow($taille / 100, 2) : null;
+        $taille_m = ($taille > 0 && $taille < 10) ? $taille : $taille / 100;
+        $imc = $taille > 0 ? $poids / pow($taille_m, 2) : null;
         (new ProfilSanteModel())
             ->where('user_id', $userId)
             ->set([
