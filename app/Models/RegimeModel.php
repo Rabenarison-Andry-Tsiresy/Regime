@@ -14,10 +14,14 @@ class RegimeModel extends Model
         'description',
         'duree_jours',
         'prix',
+        'calories_cible',
         'variation_poids',
         'pourcentage_viande',
         'pourcentage_poisson',
         'pourcentage_volaille',
+        'pourcentage_legumes_verts',
+        'pourcentage_fruits',
+        'pourcentage_feculents',
         'objectif_id',
     ];
     protected $useTimestamps = true;

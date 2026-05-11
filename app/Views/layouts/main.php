@@ -247,6 +247,7 @@
         </div>
         <div class="nav-links">
             <a href="<?= site_url('/regimes') ?>">Regimes</a>
+            <a href="<?= site_url('/aliments') ?>">Aliments</a>
             <a href="<?= site_url('/activites') ?>">Activites</a>
             <a href="<?= site_url('/imc') ?>">IMC</a>
             <a href="<?= site_url('/portefeuille') ?>">Portefeuille</a>

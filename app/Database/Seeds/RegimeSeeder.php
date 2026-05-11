@@ -10,19 +10,19 @@ class RegimeSeeder extends Seeder
     {
         $now = date('Y-m-d H:i:s');
 
-        $this->db->table('sexes')->insertBatch([
+        $this->insertMissingRows('sexes', 'label', [
             ['label' => 'Homme', 'created_at' => $now, 'updated_at' => $now],
             ['label' => 'Femme', 'created_at' => $now, 'updated_at' => $now],
             ['label' => 'Autre', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
-        $this->db->table('objectifs')->insertBatch([
+        $this->insertMissingRows('objectifs', 'code', [
             ['code' => 'gain', 'label' => 'Augmenter le poids', 'created_at' => $now, 'updated_at' => $now],
             ['code' => 'loss', 'label' => 'Reduire le poids', 'created_at' => $now, 'updated_at' => $now],
             ['code' => 'ideal', 'label' => 'Atteindre IMC ideal', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
-        $this->db->table('parametres')->insertBatch([
+        $this->insertMissingRows('parametres', 'cle', [
             ['cle' => 'imc_underweight_max', 'valeur' => '18.5', 'created_at' => $now, 'updated_at' => $now],
             ['cle' => 'imc_normal_max', 'valeur' => '24.9', 'created_at' => $now, 'updated_at' => $now],
             ['cle' => 'imc_overweight_max', 'valeur' => '29.9', 'created_at' => $now, 'updated_at' => $now],
@@ -71,16 +71,20 @@ class RegimeSeeder extends Seeder
             ]);
         }
 
-        $this->db->table('regimes')->insertBatch([
+        $this->insertMissingRows('regimes', 'nom', [
             [
                 'nom' => 'Regime Equilibre',
                 'description' => 'Approche stable avec repartition simple.',
                 'duree_jours' => 30,
                 'prix' => 120,
+                'calories_cible' => 1800,
                 'variation_poids' => -2.5,
-                'pourcentage_viande' => 30,
-                'pourcentage_poisson' => 30,
-                'pourcentage_volaille' => 20,
+                'pourcentage_viande' => 20,
+                'pourcentage_poisson' => 25,
+                'pourcentage_volaille' => 15,
+                'pourcentage_legumes_verts' => 20,
+                'pourcentage_fruits' => 10,
+                'pourcentage_feculents' => 10,
                 'objectif_id' => $objectifs['loss'] ?? null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -90,10 +94,14 @@ class RegimeSeeder extends Seeder
                 'description' => 'Programme progressif pour prise de poids.',
                 'duree_jours' => 45,
                 'prix' => 150,
+                'calories_cible' => 2400,
                 'variation_poids' => 3.0,
-                'pourcentage_viande' => 35,
-                'pourcentage_poisson' => 25,
-                'pourcentage_volaille' => 20,
+                'pourcentage_viande' => 30,
+                'pourcentage_poisson' => 15,
+                'pourcentage_volaille' => 15,
+                'pourcentage_legumes_verts' => 10,
+                'pourcentage_fruits' => 10,
+                'pourcentage_feculents' => 20,
                 'objectif_id' => $objectifs['gain'] ?? null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -103,10 +111,14 @@ class RegimeSeeder extends Seeder
                 'description' => 'Maintien et stabilite sur 21 jours.',
                 'duree_jours' => 21,
                 'prix' => 90,
+                'calories_cible' => 2000,
                 'variation_poids' => 0,
-                'pourcentage_viande' => 25,
-                'pourcentage_poisson' => 30,
-                'pourcentage_volaille' => 25,
+                'pourcentage_viande' => 20,
+                'pourcentage_poisson' => 25,
+                'pourcentage_volaille' => 20,
+                'pourcentage_legumes_verts' => 15,
+                'pourcentage_fruits' => 10,
+                'pourcentage_feculents' => 10,
                 'objectif_id' => $objectifs['ideal'] ?? null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -116,10 +128,14 @@ class RegimeSeeder extends Seeder
                 'description' => 'Programme court avec suivi intensif.',
                 'duree_jours' => 14,
                 'prix' => 70,
+                'calories_cible' => 1600,
                 'variation_poids' => -1.2,
-                'pourcentage_viande' => 20,
-                'pourcentage_poisson' => 35,
-                'pourcentage_volaille' => 25,
+                'pourcentage_viande' => 15,
+                'pourcentage_poisson' => 25,
+                'pourcentage_volaille' => 15,
+                'pourcentage_legumes_verts' => 25,
+                'pourcentage_fruits' => 10,
+                'pourcentage_feculents' => 10,
                 'objectif_id' => $objectifs['loss'] ?? null,
                 'created_at' => $now,
                 'updated_at' => $now,
@@ -129,17 +145,84 @@ class RegimeSeeder extends Seeder
                 'description' => 'Plan riche en proteines pour stabiliser.',
                 'duree_jours' => 28,
                 'prix' => 110,
+                'calories_cible' => 2100,
                 'variation_poids' => 0.5,
-                'pourcentage_viande' => 40,
+                'pourcentage_viande' => 30,
                 'pourcentage_poisson' => 20,
                 'pourcentage_volaille' => 20,
+                'pourcentage_legumes_verts' => 15,
+                'pourcentage_fruits' => 5,
+                'pourcentage_feculents' => 10,
                 'objectif_id' => $objectifs['ideal'] ?? null,
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
         ]);
 
-        $this->db->table('activites_sportives')->insertBatch([
+        $this->insertMissingRows('aliments', 'nom', [
+            [
+                'nom' => 'Brocoli',
+                'categorie' => 'Legumes verts',
+                'description' => 'Riche en fibres et vitamines.',
+                'recommandation' => 'Portion 150g, 3 fois par semaine.',
+                'objectif_id' => $objectifs['loss'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nom' => 'Poulet grille',
+                'categorie' => 'Viande blanche',
+                'description' => 'Source de proteines maigres.',
+                'recommandation' => '120-150g, 3 fois par semaine.',
+                'objectif_id' => $objectifs['ideal'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nom' => 'Saumon',
+                'categorie' => 'Poisson',
+                'description' => 'Apport en omega-3.',
+                'recommandation' => '120g, 2 fois par semaine.',
+                'objectif_id' => $objectifs['ideal'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nom' => 'Riz complet',
+                'categorie' => 'Feculents',
+                'description' => 'Glucides complexes pour l energie.',
+                'recommandation' => '100g cuit, 1 a 2 fois par jour.',
+                'objectif_id' => $objectifs['gain'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nom' => 'Banane',
+                'categorie' => 'Fruits',
+                'description' => 'Energie rapide et potassium.',
+                'recommandation' => '1 a 2 par jour.',
+                'objectif_id' => $objectifs['gain'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'nom' => 'Salade verte',
+                'categorie' => 'Legumes verts',
+                'description' => 'Faible en calories, bonne satiation.',
+                'recommandation' => 'A volonte avec un filet d huile.',
+                'objectif_id' => $objectifs['loss'] ?? null,
+                'actif' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+        ]);
+
+        $this->insertMissingRows('activites_sportives', 'nom', [
             ['nom' => 'Marche rapide', 'description' => '30 minutes par jour.', 'objectif_id' => $objectifs['loss'] ?? null, 'intensite' => 'modere', 'created_at' => $now, 'updated_at' => $now],
             ['nom' => 'Renforcement doux', 'description' => 'Circuit complet sans charge.', 'objectif_id' => $objectifs['gain'] ?? null, 'intensite' => 'leger', 'created_at' => $now, 'updated_at' => $now],
             ['nom' => 'Cardio fractionne', 'description' => 'Alternance effort/repos.', 'objectif_id' => $objectifs['loss'] ?? null, 'intensite' => 'intense', 'created_at' => $now, 'updated_at' => $now],
@@ -159,7 +242,14 @@ class RegimeSeeder extends Seeder
                 'updated_at' => $now,
             ];
         }
-        $this->db->table('codes_rechargement')->insertBatch($codes);
+        $this->insertMissingRows('codes_rechargement', 'code', $codes);
+
+        $this->insertMissingRows('codes_gold', 'code', [[
+            'code' => 'gyu26f4tjer4',
+            'actif' => 1,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]]);
     }
 
     private function mapByLabel(string $table): array
@@ -184,6 +274,15 @@ class RegimeSeeder extends Seeder
 
     private function insertUser(array $data): void
     {
+        $existing = $this->db->table('utilisateurs')
+            ->select('id')
+            ->where('email', $data['email'])
+            ->get()
+            ->getRowArray();
+        if ($existing) {
+            return;
+        }
+
         $now = date('Y-m-d H:i:s');
         $this->db->table('utilisateurs')->insert([
             'nom' => $data['nom'],
@@ -218,5 +317,44 @@ class RegimeSeeder extends Seeder
             'created_at' => $now,
             'updated_at' => $now,
         ]);
+    }
+
+    private function insertMissingRows(string $table, string $uniqueKey, array $rows): void
+    {
+        if ($rows === []) {
+            return;
+        }
+
+        $values = array_values(array_unique(array_map(
+            static fn (array $row): string => (string) $row[$uniqueKey],
+            $rows
+        )));
+
+        if ($values === []) {
+            return;
+        }
+
+        $existingRows = $this->db->table($table)
+            ->select($uniqueKey)
+            ->whereIn($uniqueKey, $values)
+            ->get()
+            ->getResultArray();
+
+        $existingMap = [];
+        foreach ($existingRows as $row) {
+            $existingMap[(string) $row[$uniqueKey]] = true;
+        }
+
+        $missing = [];
+        foreach ($rows as $row) {
+            $key = (string) $row[$uniqueKey];
+            if (! isset($existingMap[$key])) {
+                $missing[] = $row;
+            }
+        }
+
+        if ($missing) {
+            $this->db->table($table)->insertBatch($missing);
+        }
     }
 }

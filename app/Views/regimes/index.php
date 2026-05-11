@@ -3,6 +3,30 @@
 <?php
 $discountRate = $isGold ? ((float) $discountPercent / 100) : 0.0;
 $formatPrice = static fn ($value) => number_format((float) $value, 2, '.', ' ');
+$formatCalories = static fn ($value) => number_format((float) $value, 0, '.', ' ');
+$compositionLabels = [
+    'pourcentage_viande' => 'Viande',
+    'pourcentage_poisson' => 'Poisson',
+    'pourcentage_volaille' => 'Volaille',
+    'pourcentage_legumes_verts' => 'Legumes verts',
+    'pourcentage_fruits' => 'Fruits',
+    'pourcentage_feculents' => 'Feculents',
+];
+$buildComposition = static function (array $regime) use ($compositionLabels, $formatCalories): array {
+    $caloriesCible = isset($regime['calories_cible']) ? (int) $regime['calories_cible'] : 0;
+    $lines = [];
+    foreach ($compositionLabels as $field => $label) {
+        $percent = (int) ($regime[$field] ?? 0);
+        $line = $label . ' ' . $percent . '%';
+        if ($caloriesCible > 0) {
+            $calories = (int) round($caloriesCible * ($percent / 100));
+            $line .= ' (' . $formatCalories($calories) . ' kcal)';
+        }
+        $lines[] = $line;
+    }
+
+    return [$lines, $caloriesCible];
+};
 ?>
 <div class="card">
     <h1>Regimes</h1>
@@ -43,40 +67,41 @@ $formatPrice = static fn ($value) => number_format((float) $value, 2, '.', ' ');
     <?php if (empty($regimes)): ?>
         <p class="subtle">Aucun regime disponible pour le moment.</p>
     <?php else: ?>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nom</th>
-                    <th>Duree</th>
-                    <th>Prix</th>
-                    <th>Objectif</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($regimes as $regime): ?>
-                    <?php
-                    $prix = (float) $regime['prix'];
-                    $prixFinal = $isGold ? $prix - ($prix * $discountRate) : $prix;
-                    ?>
-                    <tr>
-                        <td><?= esc($regime['nom']) ?></td>
-                        <td><?= esc($regime['duree_jours']) ?> jours</td>
-                        <td><?= esc($formatPrice($prixFinal)) ?></td>
-                        <td><?= esc($objectifMap[$regime['objectif_id']] ?? 'Tous') ?></td>
-                        <td>
-                            <div class="actions">
-                                <a class="btn btn-ghost" href="<?= site_url('/regimes/' . $regime['id']) ?>">Detail</a>
-                                <form class="inline-form" method="post" action="<?= site_url('/regimes/apply/' . $regime['id']) ?>">
-                                    <?= csrf_field() ?>
-                                    <button class="btn btn-primary" type="submit">Activer</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+            <?php foreach ($regimes as $regime): ?>
+                <?php
+                $prix = (float) $regime['prix'];
+                $prixFinal = $isGold ? $prix - ($prix * $discountRate) : $prix;
+                [$compositionLines, $caloriesCible] = $buildComposition($regime);
+                ?>
+                <div class="card card-soft">
+                    <h3><?= esc($regime['nom']) ?></h3>
+                    <p class="subtle"><?= esc($regime['duree_jours']) ?> jours | <?= esc($objectifMap[$regime['objectif_id']] ?? 'Tous') ?></p>
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+                        <div>
+                            <div class="stat-title">Prix</div>
+                            <div class="stat-value"><?= esc($formatPrice($prixFinal)) ?></div>
+                        </div>
+                        <div>
+                            <div class="stat-title">Calories cible</div>
+                            <div class="stat-value"><?= $caloriesCible > 0 ? esc($formatCalories($caloriesCible)) . ' kcal' : '-' ?></div>
+                        </div>
+                    </div>
+                    <div class="subtle" style="margin-top: 0.5rem;">
+                        <?php foreach ($compositionLines as $line): ?>
+                            <div><?= esc($line) ?></div>
+                        <?php endforeach; ?>
+                    </div>
+                    <div class="actions">
+                        <a class="btn btn-ghost" href="<?= site_url('/regimes/' . $regime['id']) ?>">Detail</a>
+                        <form class="inline-form" method="post" action="<?= site_url('/regimes/apply/' . $regime['id']) ?>">
+                            <?= csrf_field() ?>
+                            <button class="btn btn-primary" type="submit">Activer</button>
+                        </form>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
     <?php endif; ?>
 </div>
 <?= $this->endSection() ?>

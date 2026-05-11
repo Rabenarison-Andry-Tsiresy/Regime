@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\AbonnementGoldModel;
+use App\Models\CodeGoldModel;
 use App\Models\PaiementModel;
 use App\Models\ParametreModel;
 use App\Models\PortefeuilleModel;
@@ -92,5 +93,68 @@ class Gold extends BaseController
         ]);
 
         return redirect()->to('/gold')->with('success', 'Gold active.');
+    }
+
+    public function redeem()
+    {
+        if ($redirect = $this->requireLogin()) {
+            return $redirect;
+        }
+
+        $rules = [
+            'code' => 'required|min_length[6]|max_length[50]',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+
+        $userId = (int) $this->currentUser['id'];
+        $abonnementModel = new AbonnementGoldModel();
+        if ((int) ($this->currentUser['premium'] ?? 0) === 1 || $abonnementModel->getActiveByUser($userId)) {
+            return redirect()->to('/gold')->with('error', 'Gold deja actif.');
+        }
+
+        $code = trim((string) $this->request->getPost('code'));
+        $codeModel = new CodeGoldModel();
+        $codeRow = $codeModel->findValidCode($code);
+        if (! $codeRow) {
+            return redirect()->back()->withInput()->with('errors', [
+                'code' => 'Code Gold invalide ou deja utilise.',
+            ]);
+        }
+
+        $paramModel = new ParametreModel();
+        $goldPrice = (float) $paramModel->getValue('gold_price', '50');
+
+        $abonnementModel->insert([
+            'user_id' => $userId,
+            'date_debut' => date('Y-m-d'),
+            'date_fin' => null,
+            'prix' => $goldPrice,
+            'actif' => 1,
+        ]);
+
+        $codeModel->update($codeRow['id'], [
+            'actif' => 0,
+            'used_by' => $userId,
+            'used_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        (new UserModel())->update($userId, ['premium' => 1]);
+        $user = (new UserModel())->find($userId);
+        if ($user) {
+            $this->setSessionUser($user);
+        }
+
+        (new PaiementModel())->insert([
+            'user_id' => $userId,
+            'type' => 'gold',
+            'montant' => $goldPrice,
+            'reference' => 'gold-code-' . $code,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return redirect()->to('/gold')->with('success', 'Gold active avec code.');
     }
 }
