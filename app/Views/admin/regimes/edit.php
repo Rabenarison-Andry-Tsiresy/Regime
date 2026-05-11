@@ -32,6 +32,10 @@
             <input type="number" step="0.01" id="prix" name="prix" value="<?= esc(old('prix', $regime['prix'])) ?>" required>
         </div>
         <div class="field">
+            <label for="calories_cible">Calories cible (kcal/jour)</label>
+            <input type="number" id="calories_cible" name="calories_cible" value="<?= esc(old('calories_cible', $regime['calories_cible'] ?? '')) ?>" required>
+        </div>
+        <div class="field">
             <label for="variation_poids">Variation poids</label>
             <input type="number" step="0.01" id="variation_poids" name="variation_poids" value="<?= esc(old('variation_poids', $regime['variation_poids'] ?? '')) ?>">
         </div>
@@ -46,6 +50,18 @@
         <div class="field">
             <label for="pourcentage_volaille">% Volaille</label>
             <input type="number" id="pourcentage_volaille" name="pourcentage_volaille" value="<?= esc(old('pourcentage_volaille', $regime['pourcentage_volaille'])) ?>" required>
+        </div>
+        <div class="field">
+            <label for="pourcentage_legumes_verts">% Legumes verts</label>
+            <input type="number" id="pourcentage_legumes_verts" name="pourcentage_legumes_verts" value="<?= esc(old('pourcentage_legumes_verts', $regime['pourcentage_legumes_verts'] ?? '')) ?>" required>
+        </div>
+        <div class="field">
+            <label for="pourcentage_fruits">% Fruits</label>
+            <input type="number" id="pourcentage_fruits" name="pourcentage_fruits" value="<?= esc(old('pourcentage_fruits', $regime['pourcentage_fruits'] ?? '')) ?>" required>
+        </div>
+        <div class="field">
+            <label for="pourcentage_feculents">% Feculents</label>
+            <input type="number" id="pourcentage_feculents" name="pourcentage_feculents" value="<?= esc(old('pourcentage_feculents', $regime['pourcentage_feculents'] ?? '')) ?>" required>
         </div>
         <div class="field">
             <label for="objectif_id">Objectif</label>

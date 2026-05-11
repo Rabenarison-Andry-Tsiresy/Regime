@@ -26,12 +26,14 @@ $routes->get('/regimes/(:num)', 'Regimes::show/$1');
 $routes->post('/regimes/apply/(:num)', 'Regimes::apply/$1');
 
 $routes->get('/activites', 'Activites::index');
+$routes->get('/aliments', 'Aliments::index');
 
 $routes->get('/portefeuille', 'Portefeuille::index');
 $routes->post('/portefeuille/recharge', 'Portefeuille::recharge');
 
 $routes->get('/gold', 'Gold::index');
 $routes->post('/gold/subscribe', 'Gold::subscribe');
+$routes->post('/gold/redeem', 'Gold::redeem');
 
 $routes->get('/export', 'ExportProgramme::index');
 
@@ -54,6 +56,13 @@ $routes->post('/admin/activites/store', 'AdminActivites::store');
 $routes->get('/admin/activites/edit/(:num)', 'AdminActivites::edit/$1');
 $routes->post('/admin/activites/update/(:num)', 'AdminActivites::update/$1');
 $routes->post('/admin/activites/delete/(:num)', 'AdminActivites::delete/$1');
+
+$routes->get('/admin/aliments', 'AdminAliments::index');
+$routes->get('/admin/aliments/create', 'AdminAliments::create');
+$routes->post('/admin/aliments/store', 'AdminAliments::store');
+$routes->get('/admin/aliments/edit/(:num)', 'AdminAliments::edit/$1');
+$routes->post('/admin/aliments/update/(:num)', 'AdminAliments::update/$1');
+$routes->post('/admin/aliments/delete/(:num)', 'AdminAliments::delete/$1');
 
 $routes->get('/admin/codes', 'AdminCodes::index');
 $routes->post('/admin/codes/store', 'AdminCodes::store');

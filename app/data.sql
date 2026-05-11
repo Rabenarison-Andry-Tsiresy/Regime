@@ -55,10 +55,14 @@ create table regimes (
     description text null,
     duree_jours int not null,
     prix decimal(10,2) not null,
+    calories_cible int not null,
     variation_poids decimal(5,2) null,
     pourcentage_viande tinyint not null,
     pourcentage_poisson tinyint not null,
     pourcentage_volaille tinyint not null,
+    pourcentage_legumes_verts tinyint not null,
+    pourcentage_fruits tinyint not null,
+    pourcentage_feculents tinyint not null,
     objectif_id int unsigned null,
     created_at datetime null,
     updated_at datetime null,
@@ -76,6 +80,20 @@ create table activites_sportives (
     updated_at datetime null,
     key idx_activites_objectif (objectif_id),
     constraint fk_activites_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
+) engine=InnoDB default charset=utf8mb4;
+
+create table aliments (
+    id int unsigned primary key auto_increment,
+    nom varchar(120) not null,
+    categorie varchar(60) null,
+    description text null,
+    recommandation text null,
+    objectif_id int unsigned null,
+    actif tinyint(1) not null default 1,
+    created_at datetime null,
+    updated_at datetime null,
+    key idx_aliments_objectif (objectif_id),
+    constraint fk_aliments_objectif foreign key (objectif_id) references objectifs(id) on delete set null on update cascade
 ) engine=InnoDB default charset=utf8mb4;
 
 create table portefeuilles (
@@ -101,6 +119,19 @@ create table codes_rechargement (
     unique key uq_codes_rechargement_code (code),
     key idx_codes_rechargement_used_by (used_by),
     constraint fk_codes_rechargement_user foreign key (used_by) references utilisateurs(id) on delete set null on update cascade
+) engine=InnoDB default charset=utf8mb4;
+
+create table codes_gold (
+    id int unsigned primary key auto_increment,
+    code varchar(50) not null,
+    actif tinyint(1) not null default 1,
+    used_by int unsigned null,
+    used_at datetime null,
+    created_at datetime null,
+    updated_at datetime null,
+    unique key uq_codes_gold_code (code),
+    key idx_codes_gold_used_by (used_by),
+    constraint fk_codes_gold_user foreign key (used_by) references utilisateurs(id) on delete set null on update cascade
 ) engine=InnoDB default charset=utf8mb4;
 
 create table abonnements_gold (
